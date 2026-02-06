@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Jellyfin için Otomatik IPTV Playlist İşleyici - M3U'yu STRM dosyalarına dönüştürün">
+  <title>IPTV İşleyici | Jellyfin M3U Dönüştürücü</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-content">
+        <div class="logo">
+          <div class="logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2L2 7l10 5 10-5-10-5z" />
+              <path d="M2 17l10 5 10-5" />
+              <path d="M2 12l10 5 10-5" />
+            </svg>
+          </div>
+          <span class="logo-text">IPTV İşleyici</span>
+        </div>
+        <div class="header-actions">
+          <!-- Theme Toggle -->
+          <button id="theme-toggle" class="btn-icon" aria-label="Tema değiştir">
+            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="5" />
+              <path
+                d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+            </svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            </svg>
+          </button>
+          <!-- Language Dropdown -->
+          <div class="lang-dropdown">
+            <button id="lang-toggle" class="btn-icon lang-btn" aria-label="Dil seç">
+              <img id="current-flag" class="flag-img" src="images/flag-tr.svg" alt="TR">
+            </button>
+            <div class="lang-menu" id="lang-menu">
+              <button class="lang-option" data-lang="tr">
+                <img class="flag-img" src="images/flag-tr.svg" alt="Türkçe">
+              </button>
+              <button class="lang-option" data-lang="en">
+                <img class="flag-img" src="images/flag-en.svg" alt="English">
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+      <div class="container">
+        <!-- Hero Section -->
+        <section class="hero">
+          <h1 data-i18n="heroTitle">IPTV Playlistinizi Dönüştürün</h1>
+          <p data-i18n="heroDesc">M3U playlistlerini otomatik olarak ayrıştırın ve Jellyfin uyumlu STRM dosyaları
+            oluşturun</p>
+        </section>
+
+        <!-- Configuration Card -->
+        <section class="card config-card">
+          <div class="card-header">
+            <h2>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3" />
+                <path
+                  d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+              </svg>
+              <span data-i18n="configuration">Yapılandırma</span>
+            </h2>
+            <div class="preset-selector">
+              <label for="preset-select" data-i18n="preset">Şablon:</label>
+              <select id="preset-select">
+                <option value="default" data-i18n="presetDefault">Varsayılan</option>
+                <option value="xtream">Xtream Codes</option>
+                <option value="turkish" data-i18n="presetTurkish">Türk IPTV</option>
+              </select>
+            </div>
+          </div>
+
+          <form id="config-form" class="config-form">
+            <!-- M3U Source -->
+            <div class="form-section">
+              <h3>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                <span data-i18n="m3uSource">M3U Kaynağı</span>
+              </h3>
+              <div class="form-group">
+                <label for="m3u-url" data-i18n="m3uUrl">M3U Playlist URL'si</label>
+                <div class="input-with-action">
+                  <input type="url" id="m3u-url" name="m3uUrl"
+                    placeholder="https://example.com/get.php?username=xxx&password=xxx&type=m3u" required>
+                  <button type="button" id="test-url" class="btn-secondary" data-i18n="testBtn">Test Et</button>
+                </div>
+                <span class="input-hint" data-i18n="urlHint">IPTV sağlayıcınızdan aldığınız M3U playlist URL'si
+                  (kullanıcı adı ve şifre otomatik algılanır)</span>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="username"><span data-i18n="username">Kullanıcı Adı</span> <span class="optional"
+                      data-i18n="autoDetected">(otomatik algılanır)</span></label>
+                  <input type="text" id="username" name="username" placeholder="URL'den otomatik alınacak">
+                </div>
+                <div class="form-group">
+                  <label for="password"><span data-i18n="password">Şifre</span> <span class="optional"
+                      data-i18n="autoDetected">(otomatik algılanır)</span></label>
+                  <input type="password" id="password" name="password" placeholder="URL'den otomatik alınacak">
+                </div>
+              </div>
+
+              <!-- URL Format Options -->
+              <div class="form-group">
+                <label data-i18n="outputFormat">Çıktı Formatı</label>
+                <div class="format-options">
+                  <label class="radio-label">
+                    <input type="radio" name="outputFormat" value="ts" checked>
+                    <span class="radio-check"></span>
+                    <span>TS</span>
+                  </label>
+                  <label class="radio-label">
+                    <input type="radio" name="outputFormat" value="m3u8">
+                    <span class="radio-check"></span>
+                    <span>M3U8 (HLS)</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Output Paths -->
+            <div class="form-section">
+              <h3>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                </svg>
+                <span data-i18n="outputPaths">Çıktı Dizinleri</span>
+              </h3>
+              <div class="form-group">
+                <label for="path-livetv">
+                  <span class="label-icon tv">📺</span>
+                  <span data-i18n="liveTvPath">Canlı TV Çıktı Yolu</span>
+                </label>
+                <div class="input-with-action">
+                  <input type="text" id="path-livetv" name="pathLiveTV" placeholder="Klasör seçin veya yol girin">
+                  <button type="button" class="btn-secondary btn-browse" data-target="path-livetv"
+                    data-i18n="browse">Gözat</button>
+                </div>
+                <span class="input-hint">Temizlenmiş M3U playlist için dizin</span>
+              </div>
+              <div class="form-group">
+                <label for="path-movies">
+                  <span class="label-icon movie">🎬</span>
+                  <span data-i18n="moviesPath">Film Çıktı Yolu</span>
+                </label>
+                <div class="input-with-action">
+                  <input type="text" id="path-movies" name="pathMovies" placeholder="Klasör seçin veya yol girin">
+                  <button type="button" class="btn-secondary btn-browse" data-target="path-movies"
+                    data-i18n="browse">Gözat</button>
+                </div>
+                <span class="input-hint">Film STRM dosyaları için dizin</span>
+              </div>
+              <div class="form-group">
+                <label for="path-series">
+                  <span class="label-icon series">📺</span>
+                  <span data-i18n="seriesPath">Dizi Çıktı Yolu</span>
+                </label>
+                <div class="input-with-action">
+                  <input type="text" id="path-series" name="pathSeries" placeholder="Klasör seçin veya yol girin">
+                  <button type="button" class="btn-secondary btn-browse" data-target="path-series"
+                    data-i18n="browse">Gözat</button>
+                </div>
+                <span class="input-hint">Dizi STRM dosyaları için dizin (Sezona göre düzenlenir)</span>
+              </div>
+            </div>
+
+            <!-- Schedule -->
+            <div class="form-section">
+              <h3>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+                <span data-i18n="scheduling">Zamanlama</span>
+              </h3>
+              <div class="form-group">
+                <div class="toggle-row">
+                  <label class="toggle-label">
+                    <input type="checkbox" id="schedule-enabled" name="scheduleEnabled">
+                    <span class="toggle-switch"></span>
+                  </label>
+                  <span class="toggle-text" data-i18n="enableSchedule">Zamanlanmış İşlemeyi Etkinleştir</span>
+                </div>
+              </div>
+              <div class="schedule-options" id="schedule-options">
+                <div class="form-row schedule-row">
+                  <div class="form-group">
+                    <label for="schedule-frequency" data-i18n="frequency">Sıklık</label>
+                    <select id="schedule-frequency" name="scheduleFrequency">
+                      <option value="hourly" data-i18n="hourly">Her Saat</option>
+                      <option value="daily" selected data-i18n="daily">Günlük</option>
+                      <option value="weekly" data-i18n="weekly">Haftalık</option>
+                      <option value="monthly" data-i18n="monthly">Aylık</option>
+                    </select>
+                  </div>
+                  <div class="form-group" id="day-group" style="display: none;">
+                    <label for="schedule-day" data-i18n="day">Gün</label>
+                    <select id="schedule-day" name="scheduleDay">
+                      <option value="0" data-i18n="sunday">Pazar</option>
+                      <option value="1" data-i18n="monday">Pazartesi</option>
+                      <option value="2" data-i18n="tuesday">Salı</option>
+                      <option value="3" data-i18n="wednesday">Çarşamba</option>
+                      <option value="4" data-i18n="thursday">Perşembe</option>
+                      <option value="5" data-i18n="friday">Cuma</option>
+                      <option value="6" data-i18n="saturday">Cumartesi</option>
+                    </select>
+                  </div>
+                  <div class="form-group" id="monthday-group" style="display: none;">
+                    <label for="schedule-monthday" data-i18n="monthDay">Ayın Günü</label>
+                    <select id="schedule-monthday" name="scheduleMonthDay">
+                      <option value="1">1</option>
+                      <option value="5">5</option>
+                      <option value="10">10</option>
+                      <option value="15">15</option>
+                      <option value="20">20</option>
+                      <option value="25">25</option>
+                      <option value="last" data-i18n="lastDay">Son gün</option>
+                    </select>
+                  </div>
+                  <div class="form-group" id="time-group">
+                    <label for="schedule-time" data-i18n="time">Saat</label>
+                    <input type="time" id="schedule-time" name="scheduleTime" value="03:00">
+                  </div>
+                </div>
+                <div class="schedule-preview">
+                  <span class="preview-label" data-i18n="nextRun">Sonraki çalışma:</span>
+                  <span class="preview-value" id="schedule-preview">Her gün saat 03:00'te</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="form-actions">
+              <button type="submit" class="btn-primary" id="save-config">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                  <polyline points="17 21 17 13 7 13 7 21" />
+                  <polyline points="7 3 7 8 15 8" />
+                </svg>
+                <span data-i18n="saveConfig">Yapılandırmayı Kaydet</span>
+              </button>
+              <button type="button" class="btn-accent" id="start-process">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="5 3 19 12 5 21 5 3" />
+                </svg>
+                <span data-i18n="startProcess">İşlemeyi Başlat</span>
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <!-- Progress Section -->
+        <section class="card progress-card" id="progress-section">
+          <div class="card-header">
+            <h2>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="2" x2="12" y2="6" />
+                <line x1="12" y1="18" x2="12" y2="22" />
+                <line x1="4.93" y1="4.93" x2="7.76" y2="7.76" />
+                <line x1="16.24" y1="16.24" x2="19.07" y2="19.07" />
+                <line x1="2" y1="12" x2="6" y2="12" />
+                <line x1="18" y1="12" x2="22" y2="12" />
+                <line x1="4.93" y1="19.07" x2="7.76" y2="16.24" />
+                <line x1="16.24" y1="7.76" x2="19.07" y2="4.93" />
+              </svg>
+              <span data-i18n="processStatus">İşlem Durumu</span>
+            </h2>
+            <div class="status-indicator" id="status-indicator">
+              <span class="status-dot"></span>
+              <span class="status-text" data-i18n="waiting">Bekliyor</span>
+            </div>
+          </div>
+
+          <!-- Progress Bars -->
+          <div class="progress-container">
+            <div class="progress-item" data-stage="download">
+              <div class="progress-label">
+                <span data-i18n="download">İndirme</span>
+                <span class="progress-value">0%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill"></div>
+              </div>
+            </div>
+            <div class="progress-item" data-stage="parse">
+              <div class="progress-label">
+                <span data-i18n="parsing">Ayrıştırma</span>
+                <span class="progress-value">0%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill"></div>
+              </div>
+            </div>
+            <div class="progress-item" data-stage="categorize">
+              <div class="progress-label">
+                <span data-i18n="categorizing">Kategorilendirme</span>
+                <span class="progress-value">0%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill"></div>
+              </div>
+            </div>
+            <div class="progress-item" data-stage="livetv">
+              <div class="progress-label">
+                <span data-i18n="liveTV">Canlı TV</span>
+                <span class="progress-value">0%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill"></div>
+              </div>
+            </div>
+            <div class="progress-item" data-stage="movies">
+              <div class="progress-label">
+                <span data-i18n="movies">Filmler</span>
+                <span class="progress-value">0%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill"></div>
+              </div>
+            </div>
+            <div class="progress-item" data-stage="series">
+              <div class="progress-label">
+                <span data-i18n="series">Diziler</span>
+                <span class="progress-value">0%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stats -->
+          <div class="stats-grid" id="stats-grid">
+            <div class="stat-card">
+              <div class="stat-value" id="stat-total">0</div>
+              <div class="stat-label" data-i18n="totalRecords">Toplam Kayıt</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="stat-livetv">0</div>
+              <div class="stat-label" data-i18n="liveTV">Canlı TV</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="stat-movies">0</div>
+              <div class="stat-label" data-i18n="movie">Film</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="stat-series">0</div>
+              <div class="stat-label" data-i18n="seriesStat">Dizi</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Log Section -->
+        <section class="card log-card">
+          <div class="card-header">
+            <h2>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+                <polyline points="10 9 9 9 8 9" />
+              </svg>
+              <span data-i18n="activityLog">Etkinlik Günlüğü</span>
+            </h2>
+            <button id="clear-log" class="btn-ghost" data-i18n="clear">Temizle</button>
+          </div>
+          <div class="log-container" id="log-container">
+            <div class="log-entry info">
+              <span class="log-time">--:--:--</span>
+              <span class="log-message" data-i18n="waitingConnection">Bağlantı bekleniyor...</span>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p data-i18n="footer">IPTV İşleyici v1.0 • Jellyfin için tasarlandı</p>
+    </footer>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+  <script src="app.js"></script>
+</body>
+
+</html>
