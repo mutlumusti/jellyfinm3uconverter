@@ -71,12 +71,14 @@ async function loadConfig() {
     await ensureDirs();
     const data = await fs.readFile(CONFIG_PATH, 'utf8');
     const config = JSON.parse(data);
-    // Pathleri güncelle
-    config.outputPaths = {
-      liveTV: path.join(OUTPUT_BASE, 'livetv'),
-      movies: path.join(OUTPUT_BASE, 'movies'),
-      series: path.join(OUTPUT_BASE, 'series')
-    };
+    // Eğer outputPathler JSON'da yoksa varsayılanları kullan
+    if (!config.outputPaths) {
+      config.outputPaths = {
+        liveTV: path.join(OUTPUT_BASE, 'livetv'),
+        movies: path.join(OUTPUT_BASE, 'movies'),
+        series: path.join(OUTPUT_BASE, 'series')
+      };
+    }
     return config;
   } catch {
     return {
