@@ -13,3 +13,4 @@ services:
       - TZ=Europe/Istanbul # Kendi zaman diliminize göre ayarlayabilirsiniz
     volumes:
       - ./iptv_data:/app/data
+      - /mnt/depo/medya:/mnt/depo/medya
