@@ -7,7 +7,11 @@
     "scripts": {
         "start": "electron .",
         "server": "node src/server.js",
-        "dev": "node --watch src/server.js"
+        "dev": "node --watch src/server.js",
+        "build": "electron-builder",
+        "build:msi": "electron-builder --win msi",
+        "build:nsis": "electron-builder --win nsis",
+        "dist": "electron-builder --win"
     },
     "keywords": [
         "iptv",
@@ -17,7 +21,7 @@
         "playlist",
         "electron"
     ],
-    "author": "",
+    "author": "Mustafa Mutlu",
     "license": "MIT",
     "dependencies": {
         "axios": "^1.6.7",
@@ -27,6 +31,7 @@
         "uuid": "^9.0.1"
     },
     "devDependencies": {
-        "electron": "^28.1.0"
+        "electron": "^28.1.0",
+        "electron-builder": "^24.9.1"
     }
 }

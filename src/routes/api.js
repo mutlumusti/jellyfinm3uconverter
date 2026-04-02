@@ -15,7 +15,21 @@ const __dirname = path.dirname(__filename);
 
 export const router = express.Router();
 
-const CONFIG_PATH = path.join(__dirname, '../../config.json');
+// Dizin yollarını belirle (Paketlenmiş uygulama için AppData kullan)
+let baseDataPath = process.env.DATA_DIR || path.join(__dirname, '../../');
+if (!process.env.DATA_DIR) {
+    try {
+        const { app: electronApp } = await import('electron');
+        if (electronApp && electronApp.isPackaged) {
+            baseDataPath = electronApp.getPath('userData');
+        }
+    } catch (e) {
+        // Electron ortamında değiliz
+    }
+}
+
+const CONFIG_PATH = path.join(baseDataPath, 'config.json');
+const OUTPUT_BASE = path.join(baseDataPath, 'output');
 
 // Default configuration
 const defaultConfig = {
@@ -23,9 +37,9 @@ const defaultConfig = {
     username: '',
     password: '',
     outputPaths: {
-        liveTV: './output/livetv',
-        movies: './output/movies',
-        series: './output/series'
+        liveTV: path.join(OUTPUT_BASE, 'livetv'),
+        movies: path.join(OUTPUT_BASE, 'movies'),
+        series: path.join(OUTPUT_BASE, 'series')
     },
     schedule: {
         enabled: false,
@@ -58,6 +72,8 @@ async function loadConfig() {
  * Save configuration to file
  */
 async function saveConfig(config) {
+    // Ensure parent directory exists
+    await fs.mkdir(path.dirname(CONFIG_PATH), { recursive: true });
     await fs.writeFile(CONFIG_PATH, JSON.stringify(config, null, 2), 'utf-8');
 }
 

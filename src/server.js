@@ -30,33 +30,61 @@ const io = new Server(server, {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Static files - serve frontend
-app.use(express.static(path.join(__dirname, '../public')));
+// Statik dosyalar
+const publicPath = path.join(__dirname, '../public');
+app.use(express.static(publicPath));
+
+// Dizin yollarını belirle (Paketlenmiş uygulama için AppData kullan)
+let baseDataPath = process.env.DATA_DIR || path.join(__dirname, '..');
+if (!process.env.DATA_DIR) {
+  try {
+    const { app: electronApp } = await import('electron');
+    if (electronApp && electronApp.isPackaged) {
+      baseDataPath = electronApp.getPath('userData');
+    }
+  } catch (e) {
+    // Electron ortamında değiliz
+  }
+}
+
+const CONFIG_PATH = path.join(baseDataPath, 'config.json');
+const OUTPUT_BASE = path.join(baseDataPath, 'output');
+
+// Gerekli klasörleri oluştur
+async function ensureDirs() {
+  await fs.mkdir(OUTPUT_BASE, { recursive: true });
+  await fs.mkdir(path.join(OUTPUT_BASE, 'livetv'), { recursive: true });
+  await fs.mkdir(path.join(OUTPUT_BASE, 'movies'), { recursive: true });
+  await fs.mkdir(path.join(OUTPUT_BASE, 'series'), { recursive: true });
+}
 
 // API routes
 app.use('/api', apiRouter);
+app.set('io', io);
 
 // Socket.IO handlers
 setupSocketHandlers(io);
 
-// Make io accessible to routes
-app.set('io', io);
-
-// Yapılandırma dosyası yolu
-const CONFIG_PATH = path.join(__dirname, '../config.json');
-
-// Yapılandırmayı yükle
+// Config yükle
 async function loadConfig() {
   try {
+    await ensureDirs();
     const data = await fs.readFile(CONFIG_PATH, 'utf8');
-    return JSON.parse(data);
+    const config = JSON.parse(data);
+    // Pathleri güncelle
+    config.outputPaths = {
+      liveTV: path.join(OUTPUT_BASE, 'livetv'),
+      movies: path.join(OUTPUT_BASE, 'movies'),
+      series: path.join(OUTPUT_BASE, 'series')
+    };
+    return config;
   } catch {
     return {
       m3uUrl: '',
       outputPaths: {
-        liveTV: './output/livetv',
-        movies: './output/movies',
-        series: './output/series'
+        liveTV: path.join(OUTPUT_BASE, 'livetv'),
+        movies: path.join(OUTPUT_BASE, 'movies'),
+        series: path.join(OUTPUT_BASE, 'series')
       },
       schedule: { enabled: false }
     };
@@ -86,18 +114,19 @@ app.get('*', (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 
-server.listen(PORT, async () => {
-  console.log(`
-╔══════════════════════════════════════════════════════════════╗
-║                    IPTV İŞLEYİCİ                             ║
-║                                                              ║
-║   Sunucu adresi: http://localhost:${PORT}                      ║
-║   Playlistlerinizi işlemeye hazır!                           ║
-╚══════════════════════════════════════════════════════════════╝
-  `);
-
-  // Zamanlayıcıyı başlat
-  await initializeScheduler();
-});
+export function startServer(io_callback) {
+  server.listen(PORT, async () => {
+    console.log(`Sunucu http://localhost:${PORT} adresinde çalışıyor`);
+    await initializeScheduler();
+    if (io_callback) io_callback(io);
+  });
+  return server;
+}
 
 export { io };
+
+// Eğer dosya doğrudan çalıştırılmışsa sunucuyu başlat (örn. Docker veya npm run server)
+import url from 'url';
+if (import.meta.url === url.pathToFileURL(process.argv[1]).href) {
+  startServer();
+}

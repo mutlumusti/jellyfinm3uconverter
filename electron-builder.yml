@@ -1,0 +1,18 @@
+appId: com.iptv.processor
+productName: IPTV Processor
+copyright: Copyright © 2026 Mustafa Mutlu
+directories:
+  output: dist
+files:
+  - electron/**/*
+  - public/**/*
+  - src/**/*
+  - config.json
+  - package.json
+win:
+  target:
+    - nsis
+msi:
+  oneClick: false
+  perMachine: true
+  shortcutName: IPTV Processor

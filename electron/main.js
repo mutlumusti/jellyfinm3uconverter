@@ -6,27 +6,14 @@
 import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { spawn } from 'child_process';
+
+import { startServer } from '../src/server.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 let mainWindow;
-let serverProcess;
-
-// Sunucuyu başlat
-function startServer() {
-    const serverPath = path.join(__dirname, '../src/server.js');
-
-    serverProcess = spawn('node', [serverPath], {
-        cwd: path.join(__dirname, '..'),
-        stdio: 'inherit'
-    });
-
-    serverProcess.on('error', (err) => {
-        console.error('Sunucu başlatma hatası:', err);
-    });
-}
+let serverInstance;
 
 // Ana pencereyi oluştur
 function createWindow() {
@@ -78,7 +65,7 @@ ipcMain.handle('select-folder', async () => {
 
 // Uygulama hazır olduğunda
 app.whenReady().then(() => {
-    startServer();
+    serverInstance = startServer();
     createWindow();
 
     app.on('activate', () => {
@@ -90,17 +77,7 @@ app.whenReady().then(() => {
 
 // Tüm pencereler kapatıldığında
 app.on('window-all-closed', () => {
-    if (serverProcess) {
-        serverProcess.kill();
-    }
     if (process.platform !== 'darwin') {
         app.quit();
-    }
-});
-
-// Uygulama kapatılmadan önce
-app.on('before-quit', () => {
-    if (serverProcess) {
-        serverProcess.kill();
     }
 });
